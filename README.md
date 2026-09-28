@@ -16,12 +16,12 @@
   <a href="LICENSE">
     <img src="https://img.shields.io/github/license/kmcahfne/slotty?color=green" alt="License" />
   </a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey" alt="Platform" />
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="Platform" />
 </p>
 
 <p align="center">
   <a href="https://skillicons.dev">
-    <img src="https://skillicons.dev/icons?i=flutter,dart,apple,windows,githubactions,vscode" alt="Skills" />
+    <img src="https://skillicons.dev/icons?i=flutter,dart,apple" alt="Skills" />
   </a>
 </p>
 
@@ -44,9 +44,9 @@
 
 ## インストール（macOS）
 
-1. [最新の Releases ページ](https://github.com/kmcahfne/slotty/releases/latest) から `slotty-macos.dmg` をダウンロード
-2. ダウンロードした `.dmg` ファイルを開く
-3. `Slotty` アイコンを `Applications`（アプリケーション）フォルダへドラッグ＆ドロップ
+1. [最新の Releases ページ](https://github.com/kmcahfne/slotty/releases/latest) から `slotty-macos.dmg` をダウンロードします。
+2. ダウンロードした `.dmg` ファイルをダブルクリックして開きます。
+3. `Slotty` アイコンを `Applications`（アプリケーション）フォルダへドラッグ＆ドロップします。
 
 <details>
 <summary><strong>初回起動時の注意（macOS Gatekeeper 警告について）</strong></summary>
@@ -55,47 +55,15 @@
 
 以下の手順で起動を許可してください：
 
-1. Finder で **「アプリケーション」** フォルダを開く
-2. `Slotty.app` を **Control キーを押しながらクリック（右クリック）** し、メニューから **「開く」** を選択
-3. 確認ダイアログが表示されたら **「開く」** をクリック（2回目以降は通常起動可能）
+1. Finder で **「アプリケーション」** フォルダを開きます。
+2. `Slotty.app` を **Control キーを押しながらクリック（右クリック）** し、メニューから **「開く」** を選択します。
+3. 確認ダイアログが表示されたら **「開く」** をクリックします（2回目以降は通常通り起動できます）。
 
 ※ ターミナルから以下のコマンドを実行して隔離属性を解除することも可能です：
 ```bash
 xattr -cr /Applications/Slotty.app
 ```
 </details>
-
-## 環境構築
-
-1. Flutter SDK をインストール (Flutter 3.28+ / Dart 3.12+)
-2. リポジトリをクローン:
-   ```bash
-   git clone https://github.com/kmcahfne/slotty.git
-   cd slotty
-   ```
-3. 依存関係を取得:
-   ```bash
-   flutter pub get
-   ```
-4. アプリを実行:
-   ```bash
-   flutter run -d macos
-   ```
-
-### ビルドコマンド
-
-- **macOS リリースビルド**:
-  ```bash
-  flutter build macos --release
-  ```
-- **Windows リリースビルド**:
-  ```bash
-  flutter build windows --release
-  ```
-- **テスト実行**:
-  ```bash
-  flutter test
-  ```
 
 ## ライセンス
 
