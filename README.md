@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD033 MD045 MD013 -->
+<p align="center">
+  <img src="assets/back.png" width="100%" alt="Slotty">
+</p>
+
 <h1 align="center">Slotty</h1>
 
 <p align="center">
