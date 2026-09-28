@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:loopwork/app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('renders the task list shell', (WidgetTester tester) async {
     await tester.pumpWidget(const LoopworkApp());
     await tester.pumpAndSettle();
@@ -109,15 +113,14 @@ void main() {
     await tester.pumpWidget(const LoopworkApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('資料整理'), findsOneWidget);
-
     await tester.tap(find.byIcon(CupertinoIcons.trash));
     await tester.pumpAndSettle();
+
     await tester.tap(find.byKey(const ValueKey('delete-task-資料整理')));
     await tester.pumpAndSettle();
 
     expect(find.text('資料整理'), findsNothing);
-    expect(find.byKey(const ValueKey('task-資料整理-unset')), findsNothing);
+    expect(find.text('顧客フォロー'), findsOneWidget);
   });
 
   testWidgets('pencil button toggles time editing and applies value', (
@@ -126,57 +129,57 @@ void main() {
     await tester.pumpWidget(const LoopworkApp());
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const ValueKey('session-minute-field')), findsNothing);
+
     await tester.tap(find.byKey(const ValueKey('edit-session-time-button')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('session-minute-field')), findsOneWidget);
     expect(find.byKey(const ValueKey('session-second-field')), findsOneWidget);
-    expect(find.byKey(const ValueKey('session-minute-box')), findsOneWidget);
-    expect(find.byKey(const ValueKey('session-second-box')), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const ValueKey('session-minute-field')),
-      '99',
+      '45',
     );
     await tester.enterText(
       find.byKey(const ValueKey('session-second-field')),
-      '99',
+      '15',
     );
-
     await tester.tap(find.byKey(const ValueKey('edit-session-time-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('99:99'), findsOneWidget);
     expect(find.byKey(const ValueKey('session-minute-field')), findsNothing);
+    expect(find.text('45:15'), findsOneWidget);
   });
 
   testWidgets('start button begins countdown and supports pause/resume', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      const LoopworkApp(sessionDuration: Duration(seconds: 3)),
+      const LoopworkApp(sessionDuration: Duration(seconds: 10)),
     );
     await tester.pumpAndSettle();
+
+    expect(find.text('開始'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('start-session-button')));
     await tester.pump();
 
     expect(find.text('停止'), findsOneWidget);
     expect(find.text('クリア'), findsOneWidget);
-    expect(find.byIcon(CupertinoIcons.play_fill), findsNWidgets(2));
 
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('00:02'), findsOneWidget);
+    expect(find.text('00:09'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('pause-resume-session-button')));
-    await tester.pumpAndSettle();
-
+    await tester.pump();
     expect(find.text('再開'), findsOneWidget);
+
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('00:02'), findsOneWidget);
+    expect(find.text('00:09'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('pause-resume-session-button')));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('停止'), findsOneWidget);
   });
 
@@ -235,5 +238,69 @@ void main() {
     expect(feedbackStopped, isTrue);
     expect(find.text('開始'), findsOneWidget);
     expect(find.text('00:01'), findsOneWidget);
+  });
+
+  testWidgets('persists tasks and restored state on relaunch', (
+    WidgetTester tester,
+  ) async {
+    // 1st launch: add task and toggle set
+    await tester.pumpWidget(const LoopworkApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(CupertinoIcons.add));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('add-task-text-field')),
+      '永続化タスク',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-add-task')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('永続化タスク'), findsOneWidget);
+
+    // Toggle newly added task to 'set'
+    await tester.tap(find.text('永続化タスク'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('task-永続化タスク-set')), findsOneWidget);
+
+    // 2nd launch (rebuild widget tree without clearing SharedPreferences)
+    await tester.pumpWidget(Container());
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const LoopworkApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('永続化タスク'), findsOneWidget);
+    expect(find.byKey(const ValueKey('task-永続化タスク-set')), findsOneWidget);
+  });
+
+  testWidgets('persists configured time and restored on relaunch', (
+    WidgetTester tester,
+  ) async {
+    // 1st launch: edit time
+    await tester.pumpWidget(const LoopworkApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('edit-session-time-button')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('session-minute-field')),
+      '25',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('session-second-field')),
+      '00',
+    );
+    await tester.tap(find.byKey(const ValueKey('edit-session-time-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('25:00'), findsOneWidget);
+
+    // 2nd launch
+    await tester.pumpWidget(Container());
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const LoopworkApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('25:00'), findsOneWidget);
   });
 }

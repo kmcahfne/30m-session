@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoopworkApp extends StatelessWidget {
   const LoopworkApp({
@@ -20,7 +22,7 @@ class LoopworkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: '30m-session',
-      theme: CupertinoThemeData(
+      theme: const CupertinoThemeData(
         primaryColor: CupertinoColors.activeBlue,
         scaffoldBackgroundColor: Color(0xFFF2F2F7),
       ),
@@ -50,6 +52,10 @@ class TaskListPage extends StatefulWidget {
 }
 
 class _TaskListPageState extends State<TaskListPage> {
+  static const String _kTasksStorageKey = 'loopwork_tasks_v1';
+  static const String _kSessionMinutesKey = 'loopwork_session_minutes_v1';
+  static const String _kSessionSecondsKey = 'loopwork_session_seconds_v1';
+
   static const List<_TaskColorPattern> _availablePatterns = [
     _TaskColorPattern.mikan,
     _TaskColorPattern.peacock,
@@ -104,6 +110,7 @@ class _TaskListPageState extends State<TaskListPage> {
     _minuteController = TextEditingController(text: _configuredTime.minuteText);
     _secondController = TextEditingController(text: _configuredTime.secondText);
     _audioPlayer = AudioPlayer();
+    unawaited(_loadPersistedState());
   }
 
   @override
@@ -113,6 +120,85 @@ class _TaskListPageState extends State<TaskListPage> {
     _minuteController.dispose();
     _secondController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPersistedState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final tasksJson = prefs.getString(_kTasksStorageKey);
+    final savedMinutes = prefs.getInt(_kSessionMinutesKey);
+    final savedSeconds = prefs.getInt(_kSessionSecondsKey);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      if (tasksJson != null) {
+        try {
+          final decoded = jsonDecode(tasksJson) as List<dynamic>;
+          _tasks
+            ..clear()
+            ..addAll(
+              decoded.map((item) {
+                final map = item as Map<String, dynamic>;
+                final colorName = map['color'] as String?;
+                final pattern = _availablePatterns.firstWhere(
+                  (p) => p.name == colorName,
+                  orElse: () => _TaskColorPattern.mikan,
+                );
+                return _PreviewTask(
+                  name: map['name'] as String? ?? '',
+                  isSet: map['isSet'] as bool? ?? false,
+                  colorPattern: pattern,
+                );
+              }),
+            );
+        } catch (_) {
+          // If parse fails, preserve existing defaults
+        }
+      }
+
+      if (savedMinutes != null && savedSeconds != null) {
+        final savedTime = _EditableSessionTime(
+          minutes: savedMinutes.clamp(0, 99),
+          seconds: savedSeconds.clamp(0, 99),
+        );
+        _configuredTime = savedTime;
+        if (!_isSessionActive) {
+          _remainingTime = savedTime;
+          _minuteController.text = savedTime.minuteText;
+          _secondController.text = savedTime.secondText;
+        }
+      }
+    });
+  }
+
+  Future<void> _saveTasks() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = _tasks
+          .map(
+            (task) => {
+              'name': task.name,
+              'isSet': task.isSet,
+              'color': task.colorPattern.name,
+            },
+          )
+          .toList();
+      await prefs.setString(_kTasksStorageKey, jsonEncode(data));
+    } catch (_) {
+      // Storage error gracefully ignored
+    }
+  }
+
+  Future<void> _saveConfiguredTime(_EditableSessionTime time) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_kSessionMinutesKey, time.minutes);
+      await prefs.setInt(_kSessionSecondsKey, time.seconds);
+    } catch (_) {
+      // Storage error gracefully ignored
+    }
   }
 
   @override
@@ -175,7 +261,7 @@ class _TaskListPageState extends State<TaskListPage> {
                         child: CupertinoButton(
                           key: const ValueKey('edit-session-time-button'),
                           padding: EdgeInsets.zero,
-                          minSize: 28,
+                          minimumSize: const Size(28, 28),
                           onPressed: _isSessionActive
                               ? null
                               : _toggleTimeEditMode,
@@ -236,6 +322,7 @@ class _TaskListPageState extends State<TaskListPage> {
     setState(() {
       target.isSet = !target.isSet;
     });
+    unawaited(_saveTasks());
   }
 
   Future<void> _showAddTaskDialog() async {
@@ -324,6 +411,7 @@ class _TaskListPageState extends State<TaskListPage> {
         ),
       );
     });
+    unawaited(_saveTasks());
   }
 
   void _deleteTask(_PreviewTask target) {
@@ -334,6 +422,7 @@ class _TaskListPageState extends State<TaskListPage> {
     setState(() {
       _tasks.remove(target);
     });
+    unawaited(_saveTasks());
   }
 
   void _toggleDeleteMode() {
@@ -511,6 +600,7 @@ class _TaskListPageState extends State<TaskListPage> {
       _remainingTime = _configuredTime;
     });
 
+    unawaited(_saveTasks());
     unawaited(_startCompletionFeedback());
 
     if (!mounted) {
@@ -577,6 +667,7 @@ class _TaskListPageState extends State<TaskListPage> {
       _minuteController.text = nextTime.minuteText;
       _secondController.text = nextTime.secondText;
     });
+    unawaited(_saveConfiguredTime(nextTime));
   }
 
   int _parseTimeSegment(String value) {
@@ -797,7 +888,7 @@ class _TaskBar extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                               ),
-                              minSize: 30,
+                              minimumSize: const Size(30, 30),
                               onPressed: onDelete,
                               child: Icon(
                                 CupertinoIcons.delete,
