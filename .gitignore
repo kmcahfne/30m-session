@@ -52,3 +52,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Certificates and keys (never commit)
+certs/
+*.key
+*.csr
+*.cer
+*.p12

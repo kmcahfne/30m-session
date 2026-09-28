@@ -17,6 +17,7 @@
     <img src="https://img.shields.io/github/license/kmcahfne/slotty?color=green" alt="License" />
   </a>
   <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="Platform" />
+  <img src="https://img.shields.io/badge/Apple-Notarized-success" alt="Apple Notarized" />
 </p>
 
 <p align="center">
@@ -47,23 +48,9 @@
 1. [最新の Releases ページ](https://github.com/kmcahfne/slotty/releases/latest) から `slotty-macos.dmg` をダウンロードします。
 2. ダウンロードした `.dmg` ファイルをダブルクリックして開きます。
 3. `Slotty` アイコンを `Applications`（アプリケーション）フォルダへドラッグ＆ドロップします。
+4. 通常通りダブルクリックして起動します。
 
-<details>
-<summary><strong>初回起動時の注意（macOS Gatekeeper 警告について）</strong></summary>
-
-本アプリはオープンソースの未署名バイナリとして配布されているため、初回起動時に「開発元を検証できないため開けません」等の警告が表示される場合があります。
-
-以下の手順で起動を許可してください：
-
-1. Finder で **「アプリケーション」** フォルダを開きます。
-2. `Slotty.app` を **Control キーを押しながらクリック（右クリック）** し、メニューから **「開く」** を選択します。
-3. 確認ダイアログが表示されたら **「開く」** をクリックします（2回目以降は通常通り起動できます）。
-
-※ ターミナルから以下のコマンドを実行して隔離属性を解除することも可能です：
-```bash
-xattr -cr /Applications/Slotty.app
-```
-</details>
+> **Note**: 本アプリは Apple による公証（Notarization）を受けています。初回起動時に「インターネットからダウンロードされたアプリケーションです」という確認が出た場合は「開く」をクリックしてください。
 
 ## ライセンス
 
