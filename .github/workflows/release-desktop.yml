@@ -33,20 +33,20 @@ jobs:
       - name: Archive macOS app
         run: |
           cd build/macos/Build/Products/Release
-          ditto -c -k --sequesterRsrc --keepParent "30m-session.app" "30m-session-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent "Slotty.app" "slotty-macos.zip"
           mkdir -p dmg-staging
-          cp -R "30m-session.app" dmg-staging/
+          cp -R "Slotty.app" dmg-staging/
           ln -s /Applications dmg-staging/Applications
-          hdiutil create -volname "30m-session" -srcfolder dmg-staging -ov -format UDZO "30m-session-macos.dmg"
+          hdiutil create -volname "Slotty" -srcfolder dmg-staging -ov -format UDZO "slotty-macos.dmg"
           rm -rf dmg-staging
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 30m-session-macos
+          name: slotty-macos
           path: |
-            build/macos/Build/Products/Release/30m-session-macos.zip
-            build/macos/Build/Products/Release/30m-session-macos.dmg
+            build/macos/Build/Products/Release/slotty-macos.zip
+            build/macos/Build/Products/Release/slotty-macos.dmg
 
   build-windows:
     name: Build Windows
@@ -71,13 +71,13 @@ jobs:
       - name: Archive Windows app
         shell: pwsh
         run: |
-          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/windows/x64/runner/30m-session-windows.zip -Force
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/windows/x64/runner/slotty-windows.zip -Force
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 30m-session-windows
-          path: build/windows/x64/runner/30m-session-windows.zip
+          name: slotty-windows
+          path: build/windows/x64/runner/slotty-windows.zip
 
   release:
     name: Publish GitHub Release
@@ -91,19 +91,19 @@ jobs:
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: 30m-session-macos
+          name: slotty-macos
           path: dist
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: 30m-session-windows
+          name: slotty-windows
           path: dist
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/30m-session-macos.dmg
-            dist/30m-session-macos.zip
-            dist/30m-session-windows.zip
+            dist/slotty-macos.dmg
+            dist/slotty-macos.zip
+            dist/slotty-windows.zip

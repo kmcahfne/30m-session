@@ -21,7 +21,7 @@ class LoopworkApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
-      title: '30m-session',
+      title: 'Slotty',
       theme: const CupertinoThemeData(
         primaryColor: CupertinoColors.activeBlue,
         scaffoldBackgroundColor: Color(0xFFF2F2F7),

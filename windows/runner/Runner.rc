@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.libitech" "\0"
-            VALUE "FileDescription", "30m-session" "\0"
+            VALUE "FileDescription", "Slotty" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "30m-session" "\0"
+            VALUE "InternalName", "Slotty" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.libitech. All rights reserved." "\0"
-            VALUE "OriginalFilename", "30m-session.exe" "\0"
-            VALUE "ProductName", "30m-session" "\0"
+            VALUE "OriginalFilename", "slotty.exe" "\0"
+            VALUE "ProductName", "Slotty" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
