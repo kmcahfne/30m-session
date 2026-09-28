@@ -20,7 +20,7 @@
 
 ## インストール（macOS）
 
-1. [Releases ページ](https://github.com/kmcahfne/30m-session/releases) から最新バージョンの `slotty-macos.dmg` をダウンロードします。
+1. [Releases ページ](https://github.com/kmcahfne/slotty/releases) から最新バージョンの `slotty-macos.dmg` をダウンロードします。
 2. ダウンロードした `.dmg` ファイルをダブルクリックして開きます。
 3. `Slotty` アイコンを `Applications`（アプリケーション）フォルダへドラッグ＆ドロップします。
 
@@ -50,8 +50,8 @@ xattr -cr /Applications/Slotty.app
 
 ### リポジトリのクローンと実行
 ```bash
-git clone https://github.com/kmcahfne/30m-session.git
-cd 30m-session
+git clone https://github.com/kmcahfne/slotty.git
+cd slotty
 flutter pub get
 flutter run -d macos
 ```
